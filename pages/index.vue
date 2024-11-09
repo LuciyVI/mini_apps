@@ -1,7 +1,7 @@
 <template>
   <div class="battery-container">
     <header class="top-bar">
-      <button class="nav-button">Друзья</button>
+      <NuxtLink to="frends" class="nav-button">Друзья</NuxtLink>
       <div class="balance">
         <img src="energy.png" alt="Energy Icon" class="energy-icon" />
         <span class="balance-text">БАЛАНС ENERGY</span>
