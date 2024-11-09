@@ -11,17 +11,28 @@
     </header>
 
     <div class="battery-status">
-      <button class="nav-arrow">❮</button>
+      <button class="nav-arrow" @click="prevBattery">❮</button>
       <div class="battery">
-        <div class="battery-level" :style="{ height: batteryLevel + '%' }">
-          <span class="battery-percentage">{{ batteryLevel }} %</span>
+        <div
+          class="battery-level"
+          :style="{ height: currentBattery.level + '%', backgroundColor: getBatteryColor(currentBattery.level) }"
+        >
+          <span class="battery-percentage">{{ currentBattery.level }}%</span>
         </div>
       </div>
-      <button class="nav-arrow">❯</button>
+      <button class="nav-arrow" @click="nextBattery">❯</button>
+    </div>
+
+    <div class="battery-indicator">
+      <span
+        v-for="(battery, index) in batteries"
+        :key="index"
+        :class="['indicator-dot', { active: index === currentIndex }]"
+      ></span>
     </div>
 
     <div class="charge-button-container">
-      <router-link to="/energy" class="charge-button">⚡️ Зарядить ⚡️</router-link>
+      <router-link to="/batteryCharge" class="charge-button">⚡️ Зарядить ⚡️</router-link>
     </div>
   </div>
 </template>
@@ -30,10 +41,54 @@
 export default {
   data() {
     return {
-      batteryLevel: 33
+      batteries: [
+        { id: 1, level: 33 },
+        { id: 2, level: 45 },
+        { id: 3, level: 67 },
+        { id: 4, level: 20 },
+        { id: 5, level: 80 },
+        { id: 6, level: 55 },
+        { id: 7, level: 90 },
+        { id: 8, level: 10 },
+        { id: 9, level: 75 },
+        { id: 10, level: 60 },
+        { id: 11, level: 50 },
+        { id: 12, level: 85 },
+      ],
+      currentIndex: 0,
     };
-  }
-}
+  },
+  computed: {
+    currentBattery() {
+      return this.batteries[this.currentIndex];
+    },
+  },
+  methods: {
+    prevBattery() {
+      if (this.currentIndex > 0) {
+        this.currentIndex--;
+      } else {
+        this.currentIndex = this.batteries.length - 1; // Переход к последней батарейке
+      }
+    },
+    nextBattery() {
+      if (this.currentIndex < this.batteries.length - 1) {
+        this.currentIndex++;
+      } else {
+        this.currentIndex = 0; // Переход к первой батарейке
+      }
+    },
+    getBatteryColor(level) {
+      if (level > 70) {
+        return '#28a745'; // Зелёный
+      } else if (level >= 30 && level <= 70) {
+        return '#ffc107'; // Жёлтый
+      } else {
+        return '#dc3545'; // Красный
+      }
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -108,6 +163,7 @@ export default {
   color: #fff;
   font-size: 1.5em;
   cursor: pointer;
+  padding: 10px;
 }
 
 .battery {
@@ -118,14 +174,14 @@ export default {
   position: relative;
   overflow: hidden;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  margin: 0 20px;
 }
 
 .battery-level {
-  background-color: #d9534f;
   width: 100%;
   position: absolute;
   bottom: 0;
-  transition: height 0.3s ease;
+  transition: height 0.3s ease, background-color 0.3s ease;
 }
 
 .battery-percentage {
@@ -168,5 +224,23 @@ export default {
     padding: 10px;
     font-size: 1em;
   }
+}
+
+.battery-indicator {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.indicator-dot {
+  width: 10px;
+  height: 10px;
+  background-color: #555;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.indicator-dot.active {
+  background-color: #3a82f7;
 }
 </style>
