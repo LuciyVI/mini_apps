@@ -1,7 +1,11 @@
+import fs from 'fs';
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
+  nitro: {
+    present: 'node-server',
+  },
   head: {
-    title: 'my-app',
+    title: '',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -12,14 +16,13 @@ export default {
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
     ]
   },
-
+  
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: [
   ],
-
-  // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
-  plugins: [
-  ],
+  
+  // Plugins to run before rendering page: https:/z/go.nuxtjs.dev/config-plugins
+  // plugins: ["~/plugins/telegram.client.js"],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
@@ -44,8 +47,12 @@ export default {
     baseURL: '/',
   },
   server: {
-    host: '192.168.1.20',
-    port: '8888' 
+    host: '85.192.25.91' ,
+    port: '443' ,
+    https: {
+      key: fs.readFileSync('/root/mini_apps/crypto/server.key'),
+      cert: fs.readFileSync('/root/mini_apps/crypto/server.cert')
+    },
   },
   // PWA module configuration: https://go.nuxtjs.dev/pwa
   pwa: {

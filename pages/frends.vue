@@ -2,7 +2,7 @@
   <div class="friends-container">
     <header class="friends-header">
       <NuxtLink to="/frends" class="nav-button">Друзья</NuxtLink>
-      <button class="close-button">✖️</button>
+      <NuxtLink to="/" class="nav-button">✖️</NuxtLink>
     </header>
 
     <div class="invite-info">
@@ -11,7 +11,6 @@
         <div class="stat-item">
           <span>Вы пригласили в игру:</span>
           <div class="stat-value">
-            <!-- Рендеринг Invite Icon -->
             <img src="~/assets/frends48x48.png" alt="Invite Icon" class="invite-icon" />
             <span>13</span>
           </div>
@@ -23,7 +22,8 @@
           </div>
         </div>
       </div>
-      <button class="invite-button">Пригласить друзей</button>
+      <!-- Кнопка с функционалом приглашения -->
+      <button class="invite-button" @click="inviteFriends">Пригласить друзей</button>
     </div>
   </div>
 </template>
@@ -31,7 +31,16 @@
 <script>
 export default {
   data() {
-    return {};
+    return {
+      referralLink: 'https://t.me/chargedbatterybot', // Уникальная реферальная ссылка
+    };
+  },
+  methods: {
+    inviteFriends() {
+      const message = "Присоединяйтесь к нашей игре! Вот ваша реферальная ссылка: ${this.referralLink}";
+      const telegramUrl = "https://t.me/share/url?url=${encodeURIComponent(this.referralLink)}&text=${encodeURIComponent(message)}";
+      window.open(telegramUrl, '_blank');
+    },
   },
 };
 </script>

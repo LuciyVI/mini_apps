@@ -5,34 +5,27 @@
       <div class="balance">
         <img src="energy.png" alt="Energy Icon" class="energy-icon" />
         <span class="balance-text">БАЛАНС ENERGY</span>
-        <span class="balance-amount">10.24</span>
+        <span class="balance-amount">{{ balance }}</span>
       </div>
       <button class="nav-button">Настройки</button>
     </header>
-
+    
     <div class="battery-status">
       <button class="nav-arrow" @click="prevBattery">❮</button>
       <div class="battery">
-        <div
-          class="battery-level"
-          :style="{ height: currentBattery.level + '%', backgroundColor: getBatteryColor(currentBattery.level) }"
-        >
-          <span class="battery-percentage">{{ currentBattery.level }}%</span>
+        <!-- Уровень заряда батарейки -->
+        <div class="battery-level" :style="{ height: currentBattery.level + '%' }"></div>
+        <!-- Вывод процента заряда -->
+        <div class="battery-details">
+          <span class="battery-name">{{ currentBattery.name }}</span>
+          <span class="battery-percentage">{{ Math.max(0, currentBattery.level) }}%</span>
         </div>
       </div>
       <button class="nav-arrow" @click="nextBattery">❯</button>
     </div>
 
-    <div class="battery-indicator">
-      <span
-        v-for="(battery, index) in batteries"
-        :key="index"
-        :class="['indicator-dot', { active: index === currentIndex }]"
-      ></span>
-    </div>
-
     <div class="charge-button-container">
-      <router-link to="/batteryCharge" class="charge-button">⚡️ Зарядить ⚡️</router-link>
+      <router-link to="/energy" class="charge-button">⚡️ Зарядить ⚡️</router-link>
     </div>
   </div>
 </template>
@@ -41,51 +34,57 @@
 export default {
   data() {
     return {
-      batteries: [
-        { id: 1, level: 33 },
-        { id: 2, level: 45 },
-        { id: 3, level: 67 },
-        { id: 4, level: 20 },
-        { id: 5, level: 80 },
-        { id: 6, level: 55 },
-        { id: 7, level: 90 },
-        { id: 8, level: 10 },
-        { id: 9, level: 75 },
-        { id: 10, level: 60 },
-        { id: 11, level: 50 },
-        { id: 12, level: 85 },
-      ],
-      currentIndex: 0,
+      balance: 10.24,
+      batteries: [], // Массив всех батареек
+      currentIndex: 0, // Индекс текущей батарейки
+      timer: null, // Таймер для уменьшения заряда
     };
   },
   computed: {
+    // Текущая батарейка
     currentBattery() {
-      return this.batteries[this.currentIndex];
+      return this.batteries[this.currentIndex] || { name: "Battery", level: 100 };
     },
   },
+  mounted() {
+    this.generateDefaultBatteries();
+    this.startBatteryDrain();
+  },
+  beforeDestroy() {
+    this.stopBatteryDrain();
+  },
   methods: {
+    // Генерация батареек по умолчанию
+    generateDefaultBatteries() {
+      this.batteries = Array.from({ length: 12 }, (_, index) => ({
+        id: index + 1,
+        name: "Battery",
+        level: 100, // Полный заряд
+      }));
+    },
+    // Переключение на предыдущую батарейку
     prevBattery() {
-      if (this.currentIndex > 0) {
-        this.currentIndex--;
-      } else {
-        this.currentIndex = this.batteries.length - 1; // Переход к последней батарейке
-      }
+      this.currentIndex =
+        (this.currentIndex - 1 + this.batteries.length) % this.batteries.length;
     },
+    // Переключение на следующую батарейку
     nextBattery() {
-      if (this.currentIndex < this.batteries.length - 1) {
-        this.currentIndex++;
-      } else {
-        this.currentIndex = 0; // Переход к первой батарейке
-      }
+      this.currentIndex = (this.currentIndex + 1) % this.batteries.length;
     },
-    getBatteryColor(level) {
-      if (level > 70) {
-        return '#28a745'; // Зелёный
-      } else if (level >= 30 && level <= 70) {
-        return '#ffc107'; // Жёлтый
-      } else {
-        return '#dc3545'; // Красный
-      }
+    // Запуск уменьшения заряда батарейки
+    startBatteryDrain() {
+      const drainRate = 100 / (12 * 60); // 100% за 12 минут
+      this.timer = setInterval(() => {
+        this.batteries[this.currentIndex].level -= drainRate;
+        if (this.batteries[this.currentIndex].level <= 0) {
+          this.batteries[this.currentIndex].level = 0;
+          this.stopBatteryDrain();
+        }
+      }, 1000); // Обновление каждую секунду
+    },
+    // Остановка уменьшения заряда
+    stopBatteryDrain() {
+      clearInterval(this.timer);
     },
   },
 };
@@ -94,7 +93,7 @@ export default {
 <style scoped>
 .battery-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
   margin: auto;
   padding: 20px;
   background-color: #0e1a30;
@@ -161,11 +160,9 @@ export default {
   background: none;
   border: none;
   color: #fff;
-  font-size: 1.5em;
+  font-size: 2em;
   cursor: pointer;
-  padding: 10px;
 }
-
 .battery {
   width: 100px;
   height: 200px;
@@ -174,24 +171,36 @@ export default {
   position: relative;
   overflow: hidden;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  margin: 0 20px;
+  text-align: center;
+  color: white;
 }
 
 .battery-level {
+  background-color: #5cb85c; /* Зеленый цвет для полного заряда */
   width: 100%;
   position: absolute;
   bottom: 0;
-  transition: height 0.3s ease, background-color 0.3s ease;
+  transition: height 0.3s ease;
 }
 
-.battery-percentage {
+.battery-details {
   position: absolute;
+  width: 100%;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  text-align: center;
   color: #fff;
   font-weight: bold;
-  font-size: 1.2em;
+}
+
+.battery-name {
+  display: block;
+  font-size: 1em;
+}
+
+.battery-percentage {
+  font-size: 1.5em;
 }
 
 .charge-button-container {
@@ -217,30 +226,5 @@ export default {
 
 .charge-button:hover {
   background-color: #2a6cd4;
-}
-
-@media (max-width: 480px) {
-  .charge-button {
-    padding: 10px;
-    font-size: 1em;
-  }
-}
-
-.battery-indicator {
-  display: flex;
-  gap: 5px;
-  margin-bottom: 20px;
-}
-
-.indicator-dot {
-  width: 10px;
-  height: 10px;
-  background-color: #555;
-  border-radius: 50%;
-  transition: background-color 0.3s;
-}
-
-.indicator-dot.active {
-  background-color: #3a82f7;
 }
 </style>
